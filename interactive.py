@@ -3,7 +3,7 @@ import cmd
 
 class Interactive(cmd.Cmd):
 	intro = """Welcome to Gcode interactive console.
-Type any command then continue to next stage with 'co'"""
+Type any command then continue to next stage with 'co' or Ctrl+D"""
 	prompt = "(gcs) "
 
 	def __init__(self, controller):
