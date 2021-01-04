@@ -2,8 +2,8 @@ import cmd
 
 
 class Interactive(cmd.Cmd):
-	intro = """Gcode interpreter.
-type any command then continue to next stage with 'co'"""
+	intro = """Welcome to Gcode interactive console.
+Type any command then continue to next stage with 'co'"""
 	prompt = "(gcs) "
 
 	def __init__(self, serial):
