@@ -9,7 +9,7 @@ Gcode Sender is a tool that allows GRBL users to send GCode from file or from in
 
 ## Installation
 
-This project depends on pyserial, it can be installed using pip~:
+This project depends on pyserial, it can be installed using pip:
 
 ```sh
 pip3 install pyserial
