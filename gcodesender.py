@@ -1,5 +1,5 @@
 import argparse
-from grblserial import GrblSerial
+import grbl
 from interactive import Interactive
 
 
@@ -13,7 +13,7 @@ if __name__ == "__main__":
 
 	args = parser.parse_args()
 
-	with GrblSerial(args.device, args.baudrate) as serial:
+	with grbl.Serial(args.device, args.baudrate) as serial:
 		serial.unlock()
 
 		if args.start_console:

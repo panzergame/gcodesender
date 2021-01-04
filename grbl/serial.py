@@ -3,7 +3,7 @@ import re
 import time
 
 
-class GrblSerial:
+class Serial:
 	def __init__(self, device, baudrate):
 		self.pipe = serial.Serial(device, baudrate)
 
