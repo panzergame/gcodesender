@@ -14,16 +14,17 @@ if __name__ == "__main__":
 	args = parser.parse_args()
 
 	with grbl.Serial(args.device, args.baudrate) as serial:
-		serial.unlock()
+		controller = grbl.Controller(serial)
+		controller.unlock()
 
 		if args.start_console:
-			inter = Interactive(serial)
+			inter = Interactive(controller)
 			inter.cmdloop()
 
-		serial.reset_origin()
+		controller.reset_origin()
 		if "filename" in args:
-			serial.send_file(args.filename)
+			controller.send_file(args.filename)
 
 		if args.end_console:
-			inter = Interactive(serial)
+			inter = Interactive(controller)
 			inter.cmdloop()

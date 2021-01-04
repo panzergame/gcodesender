@@ -21,26 +21,6 @@ class Serial:
 	def __exit__(self, exc_type, exc_val, exc_tb):
 		self.pipe.close()
 
-	def send_file(self, filename):
-		"""Send file content line by line as commands
-		Wait until all commands are send or an error is detected
-		"""
-
-		try:
-			print("Sending file {}".format(filename))
-
-			with open(filename, "r") as file:
-				# Strip all lines
-				lines = map(lambda line: line.strip(), file)
-				for line in lines:
-					# Send command and wait for grbl to accept
-					res = self.send_wait_command(line)
-					print(res)
-
-		except ValueError as exception:
-			cmd, res = exception.args
-			print("Invalid command: {}, error code: {}".format(cmd, res))
-
 	def _read_line(self):
 		"""Read (blocking) a line from grbl and strip whitespaces
 		"""
@@ -76,13 +56,3 @@ class Serial:
 			raise ValueError(cmd, res)
 
 		return res
-
-	def unlock(self):
-		"""Unlock grbl for sending move commands
-		"""
-		self.send_wait_command("$x")
-
-	def reset_origin(self):
-		"""Reset coordinate origin to (0, 0, 0)
-		"""
-		self.send_wait_command("G92 X0 Y0 Z0")

@@ -6,9 +6,9 @@ class Interactive(cmd.Cmd):
 Type any command then continue to next stage with 'co'"""
 	prompt = "(gcs) "
 
-	def __init__(self, serial):
+	def __init__(self, controller):
 		cmd.Cmd.__init__(self)
-		self.serial = serial
+		self.controller = controller
 
 	def do_co(self, line):
 		return True
@@ -19,9 +19,5 @@ Type any command then continue to next stage with 'co'"""
 	def default(self, line):
 		"""Handle default commands, send them to grbl
 		"""
-		try:
-			res = self.serial.send_wait_command(line)
-			print(res)
-		except ValueError as exception:
-			cmd, res = exception.args
-			print("Invalid command: {}, error code: {}".format(cmd, res))
+		res = self.controller.send_command(line)
+		print(res)
