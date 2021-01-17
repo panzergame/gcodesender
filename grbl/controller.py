@@ -17,8 +17,11 @@ class Controller:
 				# Strip all lines
 				lines = map(lambda line: line.strip(), file)
 				for line in lines:
+					print(">", line)
+
 					# Send command and wait for grbl to accept
 					res = self.serial.send_wait_command(line)
+
 					print(res)
 
 		except ValueError as exception:
