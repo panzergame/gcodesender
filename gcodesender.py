@@ -17,14 +17,22 @@ if __name__ == "__main__":
 		controller = grbl.Controller(serial)
 		controller.unlock()
 
-		if args.start_console:
-			inter = Interactive(controller)
-			inter.cmdloop()
+		try:
+			if args.start_console:
+				inter = Interactive(controller)
+				inter.cmdloop()
 
-		controller.reset_origin()
-		if "filename" in args:
-			controller.send_file(args.filename)
+			doRun = True
+			while doRun:
+				controller.reset_origin()
+				if "filename" in args:
+					controller.send_file(args.filename)
 
-		if args.end_console:
-			inter = Interactive(controller)
-			inter.cmdloop()
+				if args.end_console:
+					inter = Interactive(controller)
+					inter.cmdloop()
+					doRun = inter.doRepeat
+				else:
+					doRun = False
+		except KeyboardInterrupt:
+			controller.stop()
