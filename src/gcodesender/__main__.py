@@ -1,6 +1,6 @@
 import argparse
-import grbl
-from interactive import Interactive
+from . import grbl
+from .interactive import Interactive
 
 
 if __name__ == "__main__":
@@ -36,3 +36,4 @@ if __name__ == "__main__":
 					doRun = False
 		except KeyboardInterrupt:
 			controller.stop()
+

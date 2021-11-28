@@ -19,7 +19,7 @@ pip3 install pyserial
 
 A typical usage looks like:
 ```sh
-python3 gcodesender.py /dev/ttyUSB0 -s -f piece.ngc
+python3 -m src.gcodesender /dev/ttyUSB0 -s -f piece.ngc
 ```
 
 `/dev/ttyUSB0` stands for your USB serial and `-f piece.ngc` for your gcode command file. Options `-s` allows to enter an interactive command interface for homing before sending file, it can be exited with command `co` or Ctrl+D to continue.
