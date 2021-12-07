@@ -1,0 +1,20 @@
+joystick:
+  index: 0
+  axes:
+    x:
+      threshold: 0.01
+      step: 0.1
+      mapping: rightx
+      invert: no
+    y:
+      threshold: 0.01
+      step: 0.05
+      mapping: lefty
+      invert: no
+    z:
+      threshold: 0.01
+      step: 0.1
+      mapping: righty
+      invert: no
+  exit:
+    mapping: a
