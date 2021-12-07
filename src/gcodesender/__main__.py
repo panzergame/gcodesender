@@ -1,12 +1,15 @@
 import argparse
+from .config import config
 from . import grbl
-from .interactive import Interactive
-
+from .interactive.console import Console
+from .interactive.joystick import Joystick
 
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser()
-	parser.add_argument("-s", "--start-console", action="store_true")
-	parser.add_argument("-e", "--end-console", action="store_true")
+	parser.add_argument("-c", "--use-console", action="store_true")
+	parser.add_argument("-j", "--use-joystick", action="store_true")
+	parser.add_argument("-s", "--start-interactive-session", action="store_true")
+	parser.add_argument("-e", "--end-interactive-session", action="store_true")
 	parser.add_argument("device")
 	parser.add_argument("-f", "--filename")
 	parser.add_argument("-b", "--baudrate", type=int, default=115200)
@@ -17,10 +20,19 @@ if __name__ == "__main__":
 		controller = grbl.Controller(serial)
 		controller.unlock()
 
+		def run_interactive_session() -> bool:
+			if args.use_joystick:
+				joystick = Joystick(config['joystick'], controller)
+				joystick.run()
+			if args.use_console:
+				console = Console(controller)
+				console.cmdloop()
+				return console.doRepeat
+			return False
+
 		try:
-			if args.start_console:
-				inter = Interactive(controller)
-				inter.cmdloop()
+			if args.start_interactive_session:
+				run_interactive_session()
 
 			doRun = True
 			while doRun:
@@ -28,12 +40,7 @@ if __name__ == "__main__":
 				if "filename" in args:
 					controller.send_file(args.filename)
 
-				if args.end_console:
-					inter = Interactive(controller)
-					inter.cmdloop()
-					doRun = inter.doRepeat
-				else:
-					doRun = False
+				doRun = run_interactive_session() if args.end_interactive_session else False
 		except KeyboardInterrupt:
 			controller.stop()
 

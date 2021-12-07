@@ -1,7 +1,7 @@
 import cmd
 
 
-class Interactive(cmd.Cmd):
+class Console(cmd.Cmd):
 	intro = """Welcome to Gcode interactive console.
 Type any command then continue to next stage with 'co' or Ctrl+D"""
 	prompt = "(gcs) "
