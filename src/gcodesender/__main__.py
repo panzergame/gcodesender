@@ -21,14 +21,15 @@ if __name__ == "__main__":
 		controller.unlock()
 
 		def run_interactive_session() -> bool:
-			if args.use_joystick:
-				joystick = Joystick(config['joystick'], controller)
-				joystick.run()
 			if args.use_console:
 				console = Console(controller)
 				console.cmdloop()
-				return console.doRepeat
-			return False
+				doRepeat = console.doRepeat
+			if args.use_joystick:
+				joystick = Joystick(config['joystick'], controller)
+				joystick.run()
+				doRepeat = False
+			return doRepeat
 
 		try:
 			if args.start_interactive_session:
