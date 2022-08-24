@@ -20,7 +20,7 @@ pip3 install -r requirements.txt
 
 A typical usage looks like:
 ```sh
-python3 -m src.gcodesender /dev/ttyUSB0 -s -f -c piece.ngc
+python3 -m src.gcodesender /dev/ttyUSB0 -s -c -f piece.ngc
 ```
 
 `/dev/ttyUSB0` stands for your USB serial and `-f piece.ngc` for your gcode command file. Options `-s -c` allows to enter an interactive command interface for homing before sending file, it can be exited with command `co` or Ctrl+D to continue.
