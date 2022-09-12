@@ -1,3 +1,6 @@
+import progressbar
+from termcolor import colored
+
 class Controller:
 	UNLOCK_CMD = '$x'
 	RESET_ORIGIN_CMD = 'G92 X0 Y0 Z0'
@@ -5,6 +8,12 @@ class Controller:
 
 	def __init__(self, serial):
 		self.serial = serial
+
+	def _print_ok(self, response):
+		print(colored('{}'.format(' '.join(response)), 'green'))
+
+	def _print_error(self, cmd, res):
+		print(colored(f'\nInvalid command: {cmd}, error code: {res}', 'red'))
 
 	def send_file(self, filename: str):
 		"""Send file content line by line as commands
@@ -16,19 +25,19 @@ class Controller:
 			# Strip all lines
 			lines = [line.strip() for line in file]
 			total_lines = len(lines)
-			try:
-				for i, line in enumerate(lines):
-					line_sent_percentage = (i + 1) / total_lines * 100
-					print("[{:.0f}%] {}".format(line_sent_percentage, line))
+			with progressbar.ProgressBar(max_value=total_lines, redirect_stdout=True) as bar:
+				try:
+					for i, line in enumerate(lines):
+						print(line + ' ', end='')
 
-					# Send command and wait for grbl to accept
-					response = self.serial.send_wait_command(line)
-					for line in response:
-						print(line)
+						# Send command and wait for grbl to accept
+						response = self.serial.send_wait_command(line)
+						self._print_ok(response)
+						bar.update(i)
 
-			except ValueError as exception:
-				cmd, res = exception.args
-				print(f'Invalid command: {cmd}, error code: {res}')
+				except ValueError as exception:
+					cmd, res = exception.args
+					self._print_error(cmd, res)
 
 	def stop(self):
 		print('Stopping !')
@@ -41,7 +50,7 @@ class Controller:
 			return self.serial.send_wait_command(cmd)
 		except ValueError as exception:
 			cmd, res = exception.args
-			print(f'Invalid command: {cmd}, error code: {res}')
+			self._print_error(cmd, res)
 			return []
 
 	def unlock(self):
