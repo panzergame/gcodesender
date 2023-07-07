@@ -1,3 +1,5 @@
 pyserial
 pysdl2
 confuse
+progressbar2
+termcolor
