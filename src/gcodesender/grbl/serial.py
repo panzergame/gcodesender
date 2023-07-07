@@ -61,3 +61,25 @@ class Serial:
 		"""Send a gcode command
 		"""
 		self._pipe.write((cmd + "\r\n").encode())
+
+class StubSerial:
+	def __init__(self, device, baudrate):
+		pass
+
+	def __enter__(self):
+		return self
+
+	def __exit__(self, exc_type, exc_val, exc_tb):
+		pass
+
+	def _read_line(self) -> str:
+		return ''
+
+	def _read_lines_untils(self, terminator_regex_prog: re.Pattern):
+		return []
+
+	def send_wait_command(self, cmd: str) -> [str]:
+		return ['ok']
+
+	def send_command(self, cmd: str):
+		pass

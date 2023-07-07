@@ -4,6 +4,55 @@ from . import grbl
 from .interactive.console import Console
 from .interactive.joystick import Joystick
 
+class Scenario:
+	def __init__(self, args):
+		self.args = args
+		self.inspector = grbl.GCodeInspector(self.args.filename) if self.args.filename else None
+
+	def run_file_step(self):
+		self.controller.reset_origin()
+		if "filename" in self.args:
+			self.controller.send_file(self.args.filename)
+
+
+	def run_one_cycle(self):
+		self.run_file_step()
+		doRun = self.run_interactive_session() if self.args.end_interactive_session else False
+		return doRun
+
+
+	def run_cycles(self):
+		while self.run_one_cycle():
+			pass
+
+
+	def run_interactive_session(self) -> bool:
+		if self.args.use_console:
+			console = Console(self.controller, self.inspector)
+			console.cmdloop()
+			doRepeat = console.doRepeat
+		if self.args.use_joystick:
+			joystick = Joystick(config['joystick'], self.controller, self.inspector)
+			joystick.run()
+			doRepeat = False
+		return doRepeat
+
+
+	def run(self):
+		with grbl.Serial(args.device, args.baudrate) as serial:
+			self.controller = grbl.Controller(serial)
+			self.controller.unlock()
+
+			try:
+				if self.args.start_interactive_session:
+					self.run_interactive_session()
+
+				self.run_cycles()
+
+			except KeyboardInterrupt:
+				self.controller.stop()
+
+
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser()
 	parser.add_argument("-c", "--use-console", action="store_true")
@@ -16,32 +65,7 @@ if __name__ == "__main__":
 
 	args = parser.parse_args()
 
-	with grbl.Serial(args.device, args.baudrate) as serial:
-		controller = grbl.Controller(serial)
-		controller.unlock()
+	scenario = Scenario(args)
+	scenario.run()
 
-		def run_interactive_session() -> bool:
-			if args.use_console:
-				console = Console(controller)
-				console.cmdloop()
-				doRepeat = console.doRepeat
-			if args.use_joystick:
-				joystick = Joystick(config['joystick'], controller)
-				joystick.run()
-				doRepeat = False
-			return doRepeat
-
-		try:
-			if args.start_interactive_session:
-				run_interactive_session()
-
-			doRun = True
-			while doRun:
-				controller.reset_origin()
-				if "filename" in args:
-					controller.send_file(args.filename)
-
-				doRun = run_interactive_session() if args.end_interactive_session else False
-		except KeyboardInterrupt:
-			controller.stop()
 

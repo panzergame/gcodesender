@@ -18,3 +18,5 @@ joystick:
       invert: no
   exit:
     mapping: a
+  test:
+    mapping: y

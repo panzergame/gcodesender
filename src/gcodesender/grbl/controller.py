@@ -39,6 +39,16 @@ class Controller:
 					cmd, res = exception.args
 					self._print_error(cmd, res)
 
+	def send_commands(self, commands: [str]):
+		for command in commands:
+			try:
+				print(command + ' ', end='')
+				response = self.send_command(command)
+				self._print_ok(response)
+			except ValueError as exception:
+				cmd, res = exception.args
+				self._print_error(cmd, res)
+
 	def stop(self):
 		print('Stopping !')
 		self.serial.send_command(self.STOP_CMD)

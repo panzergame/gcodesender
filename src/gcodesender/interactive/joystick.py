@@ -5,16 +5,19 @@ import time
 class Joystick:
 	MAX_AXIS_VAL = 32767
 	AXIS_FORMAT = '{}{:.5f}'
-	MOVE_CMD = 'G91 G0 {} G4 P0'
+	WAIT_FINISHED = 'G4 P0'
+	MOVE_CMD = 'G91 G0 {}'
 	ABSOLUTE_CMD = 'G90'
 
-	def __init__(self, config, controller):
+	def __init__(self, config, controller, inspector):
 		self._config = config
 		self._axes_config = self._config['axes']
 		self._controller = controller
+		self._inspector = inspector
 
 		self._mapping = [sdl2.SDL_GameControllerGetAxisFromString(axis['mapping'].get().encode()) for axis in self._axes_config.values()]
 		self._exit_mapping = sdl2.SDL_GameControllerGetButtonFromString(self._config['exit']['mapping'].get().encode())
+		self._test_mapping = sdl2.SDL_GameControllerGetButtonFromString(self._config['test']['mapping'].get().encode())
 
 		self._init_gamecontroller()
 
@@ -33,7 +36,7 @@ class Joystick:
 			print(f'Failed to connect to joystick at index {index}')
 
 	def _move(self, axes: [str]):
-		cmd = self.MOVE_CMD.format(' '.join(self.AXIS_FORMAT.format(name, dist) for name, dist in axes.items()))
+		cmd = self.MOVE_CMD.format(' '.join(self.AXIS_FORMAT.format(name, dist) for name, dist in axes.items())) + ' ' + self.WAIT_FINISHED
 		print(cmd)
 		self._controller.send_command(cmd)
 
@@ -53,6 +56,25 @@ class Joystick:
 		pressed = sdl2.SDL_GameControllerGetButton(self._gamecontroller, self._exit_mapping)
 		return pressed == 0
 
+	def _check_test(self):
+		pressed = sdl2.SDL_GameControllerGetButton(self._gamecontroller, self._test_mapping)
+		if pressed == 0:
+			return
+
+		if self._inspector is None:
+			print('No file selected')
+			return
+
+		gcodes = self._inspector.bounding_rect_gcodes
+		if gcodes is None:
+			print('Missing metadata gcodes')
+			return
+
+		self._reset_absolute()
+		self._controller.reset_origin()
+		self._controller.send_commands(self._inspector.bounding_rect_gcodes)
+		self._controller.send_command(self.WAIT_FINISHED)
+
 	def _reset_absolute(self):
 		self._controller.send_command(self.ABSOLUTE_CMD)
 
@@ -62,6 +84,7 @@ class Joystick:
 		while self._check_exit():
 			time.sleep(0.01)
 			self._check_axis()
+			self._check_test()
 			sdl2.SDL_GameControllerUpdate()
 
 		self._reset_absolute()
