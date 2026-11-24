@@ -6,7 +6,7 @@ import time
 class Serial:
     def __init__(self, device, baudrate):
         self._pipe = serial.Serial(device, baudrate)
-        self._ok_or_error_regex_prog = re.compile("^(ok|error).*")
+        self._ok_or_error_regex_prog = re.compile("^(ok|error|ALARM).*")
 
     def __enter__(self):
 
@@ -32,28 +32,24 @@ class Serial:
         """
 
         lines = []
-        line = self._read_line()
-        while not terminator_regex_prog.match(line):
-            lines.append(line)
+        while True:
             line = self._read_line()
+            lines.append(line)
 
-        # Insert last line matching terminator
-        lines.append(line)
-
-        self._pipe.reset_input_buffer()
-
-        return lines
+            if match := terminator_regex_prog.match(line):
+                self._pipe.reset_input_buffer()
+                return lines, match.group(1)
 
     def send_wait_command(self, cmd: str) -> [str]:
         """Send a gcode command and wait for response from grbl
         """
         self.send_command(cmd)
 
-        received_lines = self._read_lines_untils(self._ok_or_error_regex_prog)
+        received_lines, terminator_match = self._read_lines_untils(
+            self._ok_or_error_regex_prog)
 
-        first_received_line = received_lines[0]
-        if first_received_line.startswith("error"):
-            raise ValueError(cmd, first_received_line)
+        if terminator_match in ('error', 'ALARM'):
+            raise ValueError(cmd, received_lines)
 
         return received_lines
 
