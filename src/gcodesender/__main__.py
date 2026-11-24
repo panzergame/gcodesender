@@ -3,6 +3,7 @@ from .config import config
 from . import grbl
 from .interactive.console import Console
 from .interactive.joystick import Joystick
+from prompt_toolkit.patch_stdout import patch_stdout
 
 
 class Scenario:
@@ -38,7 +39,7 @@ class Scenario:
         return doRepeat
 
     def run(self):
-        with grbl.Serial(args.device, args.baudrate) as serial:
+        with grbl.Serial(args.device, args.baudrate) as serial, patch_stdout(raw=True):
             self.controller = grbl.Controller(serial)
             self.controller.reset()
             self.controller.unlock()
