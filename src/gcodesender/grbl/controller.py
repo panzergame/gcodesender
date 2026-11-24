@@ -4,8 +4,10 @@ from termcolor import colored
 
 class Controller:
     UNLOCK_CMD = '$x'
+    RESET_CMD = '\x18'
     RESET_ORIGIN_CMD = 'G92 X0 Y0 Z0'
     STOP_CMD = '!'
+    EOL = '\n'
 
     def __init__(self, serial):
         self.serial = serial
@@ -32,7 +34,8 @@ class Controller:
                         print(line + ' ', end='')
 
                         # Send command and wait for grbl to accept
-                        response = self.serial.send_wait_command(line)
+                        response = self.serial.send_wait_command(
+                            line, self.EOL)
                         self._print_ok(response)
                         bar.update(i)
 
@@ -52,13 +55,19 @@ class Controller:
 
     def stop(self):
         print('Stopping !')
-        self.serial.send_command(self.STOP_CMD)
+        self.serial.send_command(self.STOP_CMD, '')
 
-    def send_command(self, cmd: str) -> [str]:
+    def send_command(self, cmd):
+        return self._send_command_with_eol(cmd, self.EOL)
+
+    def send_raw_command(self, cmd):
+        return self._send_command_with_eol(cmd, '')
+
+    def _send_command_with_eol(self, cmd: str, eol: str) -> [str]:
         """Send a gcode command and wait for response from grbl
         """
         try:
-            return self.serial.send_wait_command(cmd)
+            return self.serial.send_wait_command(cmd, eol)
         except ValueError as exception:
             cmd, res = exception.args
             self._print_error(cmd, res)
@@ -68,6 +77,11 @@ class Controller:
         """Unlock grbl for sending move commands
         """
         self.send_command(self.UNLOCK_CMD)
+
+    def reset(self):
+        """Reset controller after an error or failed boot
+        """
+        self.send_raw_command(self.RESET_CMD)
 
     def reset_origin(self):
         """Reset coordinate origin to (0, 0, 0)

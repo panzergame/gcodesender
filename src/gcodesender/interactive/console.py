@@ -18,6 +18,10 @@ Type any command then continue to next stage with 'co' or Ctrl+D"""
     def do_EOF(self, line):
         return True
 
+    def do_x(self, line):
+        print('Resetting...')
+        self._controller.reset()
+
     def do_re(self, line):
         self.doRepeat = True
         return True
@@ -41,6 +45,4 @@ Type any command then continue to next stage with 'co' or Ctrl+D"""
     def default(self, line):
         """Handle default commands, send them to grbl
         """
-        response = self._controller.send_command(line)
-        for line in response:
-            print(line)
+        self._controller.send_command(line)

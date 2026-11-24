@@ -40,6 +40,7 @@ class Scenario:
     def run(self):
         with grbl.Serial(args.device, args.baudrate) as serial:
             self.controller = grbl.Controller(serial)
+            self.controller.reset()
             self.controller.unlock()
 
             try:
