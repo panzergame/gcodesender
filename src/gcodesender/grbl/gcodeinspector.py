@@ -19,11 +19,18 @@ class GCodeInspector:
 
     def _extract_metadata(self):
         with open(self.filename) as file:
-            for line in file:
-                if line.startswith('; metadata_json = '):
-                    tokens = line.split('=')
-                    json_text = tokens[1]
-                    return self._parse_metadata_json(json_text)
+            comments = filter(lambda line: line.startswith(';'), file)
+
+            def iterate_metadata():
+                it = iter(comments)
+                while not (line := next(it)).startswith('; metadata_json ='):
+                    pass
+
+                for line in it:
+                    yield line[2:]
+
+            json_text = ''.join(iterate_metadata())
+            return self._parse_metadata_json(json_text)
 
     @property
     def bounding_rect_gcodes(self) -> [str]:
